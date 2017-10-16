@@ -1,6 +1,7 @@
 package com.hataijin.test.httpconnection;
 
 import android.content.Context;
+import android.content.Intent;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.os.AsyncTask;
@@ -10,11 +11,12 @@ import android.os.Bundle;
 import android.text.TextUtils;
 import android.util.Log;
 import android.view.KeyEvent;
+import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.inputmethod.EditorInfo;
-import android.view.inputmethod.InputMethodManager;
 import android.webkit.WebView;
+import android.widget.AdapterView;
 import android.widget.BaseAdapter;
 import android.widget.EditText;
 import android.widget.ImageView;
@@ -29,11 +31,12 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.io.InputStream;
+import java.io.UnsupportedEncodingException;
+import java.net.URLEncoder;
 import java.util.ArrayList;
 import java.util.List;
 
 public class GoogleWebViewActivity extends AppCompatActivity implements SwipeRefreshLayout.OnRefreshListener {
-    private final static String URL_SEARCH_DETAIL = "https://en.wikipedia.org/api/rest_v1/page/html/";
     private final static String URL_SEARCH_SUMMARY = "https://en.wikipedia.org/api/rest_v1/page/summary/";
     private final static String URL_SEARCH_RELATED = "https://en.wikipedia.org/api/rest_v1/page/related/";
 
@@ -122,8 +125,12 @@ public class GoogleWebViewActivity extends AppCompatActivity implements SwipeRef
             return;
         }
 
-        new AsyncGet(AsyncGet.MODE_SUMMARY, URL_SEARCH_SUMMARY + searchText).execute();
-        new AsyncGet(AsyncGet.MODE_RELATED, URL_SEARCH_RELATED + searchText).execute();
+        try {
+            new AsyncGet(AsyncGet.MODE_SUMMARY, URL_SEARCH_SUMMARY + URLEncoder.encode(searchText, "utf-8")).execute();
+            new AsyncGet(AsyncGet.MODE_RELATED, URL_SEARCH_RELATED + URLEncoder.encode(searchText, "utf-8")).execute();
+        } catch (UnsupportedEncodingException e) {
+            e.printStackTrace();
+        }
     }
 
     private class AsyncGet extends AsyncTask {
@@ -195,6 +202,9 @@ public class GoogleWebViewActivity extends AppCompatActivity implements SwipeRef
         } catch (JSONException e) {
             e.printStackTrace();
             mListHeader = null;
+        } catch (NullPointerException e) {
+            e.printStackTrace();
+            mListHeader = null;
         }
     }
 
@@ -223,8 +233,17 @@ public class GoogleWebViewActivity extends AppCompatActivity implements SwipeRef
             }
         } catch (JSONException e) {
             e.printStackTrace();
-            mListHeader = null;
+            mListItems.clear();
+        } catch (NullPointerException e) {
+            e.printStackTrace();
+            mListItems.clear();
         }
+    }
+
+    private void startDetailActivity() {
+        Intent intent = new Intent(mContext, DetailActivity.class);
+        intent.putExtra(DetailActivity.EXTRA_SEARCH, mEditText.getText().toString());
+        startActivity(intent);
     }
 
     private class ListViewAdapter extends BaseAdapter {
@@ -238,14 +257,29 @@ public class GoogleWebViewActivity extends AppCompatActivity implements SwipeRef
 
                 if(view == null) {
                     view = getLayoutInflater().inflate(R.layout.listheader, mListView, false);
+                    view.setOnClickListener(new View.OnClickListener() {
+                        @Override
+                        public void onClick(View view) {
+                            startDetailActivity();
+                        }
+                    });
                 }
 
                 ImageView iv = view.findViewById(R.id.thumbnail);
                 new DownloadImageTask(iv)
                         .execute(mListHeader.thumbnail_source);
 
-                WebView wb = view.findViewById(R.id.webview);
-                wb.loadDataWithBaseURL(null, mListHeader.extract_html, "text/html", "utf-8", null);
+                WebView webView = view.findViewById(R.id.webview);
+                webView.loadDataWithBaseURL(null, mListHeader.extract_html, "text/html", "utf-8", null);
+                webView.setOnTouchListener(new View.OnTouchListener() {
+                    @Override
+                    public boolean onTouch(View view, MotionEvent motionEvent) {
+                        if(motionEvent.getAction() == MotionEvent.ACTION_DOWN) {
+                            startDetailActivity();
+                        }
+                        return false;
+                    }
+                });
 
                 return view;
             } else {
