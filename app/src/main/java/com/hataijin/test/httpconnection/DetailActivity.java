@@ -8,8 +8,10 @@ import android.support.annotation.Nullable;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
 import android.view.MenuItem;
+import android.view.View;
 import android.webkit.WebView;
 import android.webkit.WebViewClient;
+import android.widget.ProgressBar;
 
 import com.hataijin.test.httpconnectionlibrary.TestHttpConnection;
 
@@ -27,6 +29,7 @@ public class DetailActivity extends AppCompatActivity {
     Context mContext;
     String mSearchText;
     WebView mWebView;
+    ProgressBar mProgressBar;
 
     @Override
     protected void onPostResume() {
@@ -48,10 +51,16 @@ public class DetailActivity extends AppCompatActivity {
         setTitle(mSearchText);
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
 
+        mProgressBar = (ProgressBar) findViewById(R.id.progressbar);
+
         mWebView = (WebView) findViewById(R.id.webview);
         mWebView.getSettings().setJavaScriptEnabled(true);
         mWebView.setWebViewClient(new WebViewClient() {
-
+            @Override
+            public void onPageFinished(WebView view, String url) {
+                super.onPageFinished(view, url);
+                mProgressBar.setVisibility(View.GONE);
+            }
         });
 
         try {

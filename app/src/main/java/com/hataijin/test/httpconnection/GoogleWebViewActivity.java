@@ -50,6 +50,10 @@ public class GoogleWebViewActivity extends AppCompatActivity implements SwipeRef
     private String mSearchResultSummary = null;
     private String mSearchResultRelated = null;
 
+    private float mDownPosX;
+    private float mDownPosY;
+    private float MOVE_THRESHOLD_DP;
+
     private int mRequestNum = 0;
 
     private class ListHeader {
@@ -104,6 +108,8 @@ public class GoogleWebViewActivity extends AppCompatActivity implements SwipeRef
                 }
             }
         });
+
+        MOVE_THRESHOLD_DP = 20.0F * getResources().getDisplayMetrics().density;
 
         mTestHttpConnection = new TestHttpConnection();
     }
@@ -284,7 +290,26 @@ public class GoogleWebViewActivity extends AppCompatActivity implements SwipeRef
 
                 WebView webView = view.findViewById(R.id.webview);
                 webView.loadDataWithBaseURL(null, mListHeader.extract_html, "text/html", "utf-8", null);
-                webView.setFocusable(false);
+                webView.setOnTouchListener(new View.OnTouchListener() {
+                    @Override
+                    public boolean onTouch(View view, MotionEvent motionEvent) {
+                        switch (motionEvent.getAction()) {
+                            case MotionEvent.ACTION_DOWN:
+                                mDownPosX = motionEvent.getX();
+                                mDownPosY = motionEvent.getY();
+                                break;
+                            case MotionEvent.ACTION_UP:
+                                float upPosX = motionEvent.getX();
+                                float upPosY = motionEvent.getY();
+                                if ((Math.abs(upPosX - mDownPosX) < MOVE_THRESHOLD_DP) && (Math.abs(upPosY - mDownPosY) < MOVE_THRESHOLD_DP)) {
+                                    startDetailActivity();
+                                }
+
+                                break;
+                        }
+                        return false;
+                    }
+                });
 
                 return view;
             } else {
