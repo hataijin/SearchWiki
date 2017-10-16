@@ -32,7 +32,7 @@ import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.List;
 
-public class GoogleWebView extends AppCompatActivity implements SwipeRefreshLayout.OnRefreshListener {
+public class GoogleWebViewActivity extends AppCompatActivity implements SwipeRefreshLayout.OnRefreshListener {
     private final static String URL_SEARCH_DETAIL = "https://en.wikipedia.org/api/rest_v1/page/html/";
     private final static String URL_SEARCH_SUMMARY = "https://en.wikipedia.org/api/rest_v1/page/summary/";
     private final static String URL_SEARCH_RELATED = "https://en.wikipedia.org/api/rest_v1/page/related/";
