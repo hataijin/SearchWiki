@@ -96,6 +96,14 @@ public class GoogleWebViewActivity extends AppCompatActivity implements SwipeRef
         mListView = (ListView) findViewById(R.id.SearchListView);
         mListViewAdapter = new ListViewAdapter();
         mListView.setAdapter(mListViewAdapter);
+        mListView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+            @Override
+            public void onItemClick(AdapterView<?> adapterView, View view, int i, long l) {
+                if(i == 0) {
+                    startDetailActivity();
+                }
+            }
+        });
 
         mTestHttpConnection = new TestHttpConnection();
     }
@@ -197,8 +205,13 @@ public class GoogleWebViewActivity extends AppCompatActivity implements SwipeRef
             mListHeader.displaytitle = jObject.getString("displaytitle");
             mListHeader.extract_html = jObject.getString("extract_html");
 
-            JSONObject jObjectThumb = jObject.getJSONObject("thumbnail");
-            mListHeader.thumbnail_source = jObjectThumb.getString("source");
+            if(jObject.has("thumbnail")) {
+                JSONObject jObjectThumb = jObject.getJSONObject("thumbnail");
+                mListHeader.thumbnail_source = jObjectThumb.getString("source");
+            } else {
+                mListHeader.thumbnail_source = null;
+            }
+
         } catch (JSONException e) {
             e.printStackTrace();
             mListHeader = null;
@@ -254,32 +267,24 @@ public class GoogleWebViewActivity extends AppCompatActivity implements SwipeRef
         public View getView(int i, View view, ViewGroup viewGroup) {
             if(getItemViewType(i) == TYPE_HEADER) {
                 //ListHeader
+                if(mListHeader == null) {
+                    return null;
+                }
 
                 if(view == null) {
                     view = getLayoutInflater().inflate(R.layout.listheader, mListView, false);
-                    view.setOnClickListener(new View.OnClickListener() {
-                        @Override
-                        public void onClick(View view) {
-                            startDetailActivity();
-                        }
-                    });
                 }
 
                 ImageView iv = view.findViewById(R.id.thumbnail);
-                new DownloadImageTask(iv)
-                        .execute(mListHeader.thumbnail_source);
+
+                if(mListHeader.thumbnail_source != null) {
+                    new DownloadImageTask(iv)
+                            .execute(mListHeader.thumbnail_source);
+                }
 
                 WebView webView = view.findViewById(R.id.webview);
                 webView.loadDataWithBaseURL(null, mListHeader.extract_html, "text/html", "utf-8", null);
-                webView.setOnTouchListener(new View.OnTouchListener() {
-                    @Override
-                    public boolean onTouch(View view, MotionEvent motionEvent) {
-                        if(motionEvent.getAction() == MotionEvent.ACTION_DOWN) {
-                            startDetailActivity();
-                        }
-                        return false;
-                    }
-                });
+                webView.setFocusable(false);
 
                 return view;
             } else {
@@ -309,7 +314,8 @@ public class GoogleWebViewActivity extends AppCompatActivity implements SwipeRef
         public int getCount() {
             int num = 0;
 
-            if(!TextUtils.isEmpty(mSearchResultSummary)) {
+            if(!TextUtils.isEmpty(mSearchResultSummary)
+                    && mListHeader != null) {
                 num++;
             }
 
