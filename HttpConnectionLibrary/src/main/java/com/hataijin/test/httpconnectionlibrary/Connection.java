@@ -4,6 +4,7 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.util.Map;
 
 /**
  * Created by User on 2017-10-16.
@@ -13,10 +14,10 @@ class Connection {
     protected int mConnectionTimeout = 15000;
     protected int mResponseCode = 0;
 
-    public String get(String urlStr) {return null;}
-    public <T> String post(String urlStr, T postData) {return null;}
-    public String delete(String urlStr) {return null;}
-    public <T> String put(String urlStr, T postData) {return null;}
+    public String get(String urlStr, Map<String, String> requestHeader) {return null;}
+    public <T> String post(String urlStr, T postData, Map<String, String> requestHeader) {return null;}
+    public String delete(String urlStr, Map<String, String> requestHeader) {return null;}
+    public <T> String put(String urlStr, T postData, Map<String, String> requestHeader) {return null;}
 
     public void setConnectionTimeout(int timeout) {
         mConnectionTimeout = timeout;

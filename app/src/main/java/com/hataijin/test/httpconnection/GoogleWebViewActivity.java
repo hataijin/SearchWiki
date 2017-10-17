@@ -178,7 +178,7 @@ public class GoogleWebViewActivity extends AppCompatActivity implements SwipeRef
 
         @Override
         protected String doInBackground(Object[] objects) {
-            return mTestHttpConnection.get(mUrl);
+            return mTestHttpConnection.get(mUrl, null);
         }
 
         @Override

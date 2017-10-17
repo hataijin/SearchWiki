@@ -9,6 +9,7 @@ import java.io.OutputStreamWriter;
 import java.net.HttpURLConnection;
 import java.net.MalformedURLException;
 import java.net.URL;
+import java.util.Map;
 
 import javax.net.ssl.HttpsURLConnection;
 
@@ -18,13 +19,14 @@ import javax.net.ssl.HttpsURLConnection;
 
 class HttpsConnection extends Connection {
     @Override
-    public String get(String urlStr) {
+    public String get(String urlStr, Map<String, String> requestHeader) {
         HttpsURLConnection httpUrlConnection = null;
 
         try {
             URL url = new URL(urlStr);
             httpUrlConnection = (HttpsURLConnection) url.openConnection();
             httpUrlConnection.setConnectTimeout(mConnectionTimeout);
+            putHeader(httpUrlConnection, requestHeader);
 
             httpUrlConnection.connect();
 
@@ -50,7 +52,7 @@ class HttpsConnection extends Connection {
     }
 
     @Override
-    public <T> String post(String urlStr, T postData) {
+    public <T> String post(String urlStr, T postData, Map<String, String> requestHeader) {
         HttpsURLConnection httpUrlConnection = null;
 
         try {
@@ -63,6 +65,7 @@ class HttpsConnection extends Connection {
             httpUrlConnection.setRequestProperty(
                     "Content-Type", "application/x-www-form-urlencoded" );
             httpUrlConnection.setConnectTimeout(mConnectionTimeout);
+            putHeader(httpUrlConnection, requestHeader);
 
             OutputStream os = httpUrlConnection.getOutputStream();
             BufferedWriter writer = new BufferedWriter(
@@ -96,13 +99,14 @@ class HttpsConnection extends Connection {
     }
 
     @Override
-    public String delete(String urlStr) {
+    public String delete(String urlStr, Map<String, String> requestHeader) {
         HttpsURLConnection httpUrlConnection = null;
 
         try {
             URL url = new URL(urlStr);
             httpUrlConnection = (HttpsURLConnection) url.openConnection();
             httpUrlConnection.setRequestMethod("DELETE");
+            putHeader(httpUrlConnection, requestHeader);
 
             httpUrlConnection.connect();
             httpUrlConnection.setConnectTimeout(mConnectionTimeout);
@@ -130,7 +134,7 @@ class HttpsConnection extends Connection {
     }
 
     @Override
-    public <T> String put(String urlStr, T postData) {
+    public <T> String put(String urlStr, T postData, Map<String, String> requestHeader) {
         HttpsURLConnection httpUrlConnection = null;
 
         try {
@@ -143,6 +147,7 @@ class HttpsConnection extends Connection {
             httpUrlConnection.setRequestProperty(
                     "Content-Type", "application/x-www-form-urlencoded" );
             httpUrlConnection.setConnectTimeout(mConnectionTimeout);
+            putHeader(httpUrlConnection, requestHeader);
 
             OutputStream os = httpUrlConnection.getOutputStream();
             BufferedWriter writer = new BufferedWriter(
@@ -174,5 +179,14 @@ class HttpsConnection extends Connection {
             }
         }
         return null;
+    }
+
+    protected void putHeader(HttpsURLConnection httpsURLConnection, Map<String, String> requestHeader) {
+        if(requestHeader == null)
+            return;
+
+        for(Map.Entry<String,String> value : requestHeader.entrySet()) {
+            httpsURLConnection.setRequestProperty(value.getKey(), value.getValue());
+        }
     }
 }
