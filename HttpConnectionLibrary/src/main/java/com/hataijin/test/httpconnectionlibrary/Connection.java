@@ -10,7 +10,21 @@ import java.io.InputStreamReader;
  */
 
 class Connection {
+    protected int mConnectionTimeout = 15000;
+    protected int mResponseCode = 0;
+
     public String get(String urlStr) {return null;}
+    public <T> String post(String urlStr, T postData) {return null;}
+    public String delete(String urlStr) {return null;}
+    public <T> String put(String urlStr, T postData) {return null;}
+
+    public void setConnectionTimeout(int timeout) {
+        mConnectionTimeout = timeout;
+    }
+
+    public int getResponseCode() {
+        return mResponseCode;
+    }
 
     protected String getStringFromInputStream(InputStream inputStream) {
         if(inputStream == null) {

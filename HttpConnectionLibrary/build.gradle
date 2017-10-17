@@ -29,3 +29,14 @@ dependencies {
     compile 'com.android.support:appcompat-v7:26.+'
     testCompile 'junit:junit:4.12'
 }
+
+task clearJar(type: Delete) {
+    delete 'build/outputs/HttpConnectionLibrary.jar'
+}
+
+task makeJar(type: Copy) {
+    from('build/intermediates/bundles/release/')
+    into('build/outputs/')
+    include('classes.jar')
+    rename ('classes.jar', 'HttpConnectionLibrary.jar')
+}
