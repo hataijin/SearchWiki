@@ -15,6 +15,7 @@ import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.inputmethod.EditorInfo;
+import android.view.inputmethod.InputMethodManager;
 import android.webkit.WebView;
 import android.widget.AdapterView;
 import android.widget.BaseAdapter;
@@ -105,6 +106,12 @@ public class GoogleWebViewActivity extends AppCompatActivity implements SwipeRef
             public void onItemClick(AdapterView<?> adapterView, View view, int i, long l) {
                 if(i == 0) {
                     startDetailActivity();
+                } else {
+                    String searchText = (String) view.getTag();
+
+                    mEditText.setText(searchText);
+                    mEditText.setSelection(searchText.length());
+                    searchWiki();
                 }
             }
         });
@@ -130,6 +137,9 @@ public class GoogleWebViewActivity extends AppCompatActivity implements SwipeRef
             return;
         }
         mSwipeRefreshLayout.setRefreshing(true);
+
+        InputMethodManager imm = (InputMethodManager)getSystemService(Context.INPUT_METHOD_SERVICE);
+        imm.hideSoftInputFromWindow(getCurrentFocus().getWindowToken(), 0);
 
         String searchText = mEditText.getText().toString();
 
@@ -201,6 +211,7 @@ public class GoogleWebViewActivity extends AppCompatActivity implements SwipeRef
     private void refreshResult() {
         parseListHeader();
         parseListItems();
+        mListView.smoothScrollToPosition(0);
         mListViewAdapter.notifyDataSetChanged();
     }
 
@@ -282,6 +293,7 @@ public class GoogleWebViewActivity extends AppCompatActivity implements SwipeRef
                 }
 
                 ImageView iv = view.findViewById(R.id.thumbnail);
+                iv.setImageDrawable(null);
 
                 if(mListHeader.thumbnail_source != null) {
                     new DownloadImageTask(iv)
@@ -320,6 +332,8 @@ public class GoogleWebViewActivity extends AppCompatActivity implements SwipeRef
                 ListItem listItem = mListItems.get(i - 1);
 
                 ImageView iv = view.findViewById(R.id.thumbnail);
+                iv.setImageDrawable(null);
+
                 if(!TextUtils.isEmpty(listItem.thumbnail_source)) {
                     new DownloadImageTask(iv)
                             .execute(listItem.thumbnail_source);
@@ -330,6 +344,8 @@ public class GoogleWebViewActivity extends AppCompatActivity implements SwipeRef
 
                 TextView bodyTv = view.findViewById(R.id.body);
                 bodyTv.setText(listItem.extract);
+
+                view.setTag(listItem.title);
 
                 return view;
             }

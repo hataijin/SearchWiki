@@ -23,7 +23,6 @@
             android:layout_marginLeft="20dp"
             android:layout_marginTop="10dp"
             android:textSize="15sp"
-            android:text="google"
             android:imeOptions="actionSearch"
             android:maxLines="1"
             android:singleLine="true"
